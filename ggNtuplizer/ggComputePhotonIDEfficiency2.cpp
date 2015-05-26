@@ -22,6 +22,8 @@
 #include "TStyle.h"
 #include <vector>
 
+bool doLogPlot = false;
+
 const int nWP = 3;
 enum WpType { WP_LOOSE = 0,
 	      WP_MEDIUM, 
@@ -68,6 +70,9 @@ bool isMatched(float pEta, float pPhi,
 	       std::vector<float> *mcPhi);
 
 void set_plot_style();
+TText* doPreliminary(double x_pos,double y_pos);
+void doPlot(TH1D* plot);
+TLegend* doLegend(TH1D* plot);
 
 void ggComputePhotonIDEfficiency2()
 {
@@ -108,8 +113,7 @@ void ggComputePhotonIDEfficiency2()
   TH1D* phoETSigEB = new TH1D("phoETSigEB", "", 185, 15, 200);
   	    phoETSigEB->GetXaxis()->SetTitle("E_{T} [GeV]");
 	      phoETSigEB->GetYaxis()->SetTitle("Number of events");
-        phoETSigEB->SetFillColor(kAzure+8);
-        phoETSigEB->SetLineColor(kBlack);
+
   TH1D* phoETSigEB_noconv = new TH1D("phoETSigEB_noconv", "", 185, 15, 200); 
     	  phoETSigEB_noconv->GetXaxis()->SetTitle("E_{T} [GeV]");
 	      phoETSigEB_noconv->GetYaxis()->SetTitle("Number of events");
@@ -615,20 +619,23 @@ TH1D* FRSigEE = (TH1D*)phoETSigEE->Clone("FR");
       FRSigEB->SetFillColor(kTeal+8);
   FRSigEE->Divide(phoETSigEE_noconv);  
 
+  std::cout << "" << std::endl;
   std::cout << "***********************EB Signal Events*************************" << std::endl;
   std::cout << "Number of signal events = " << phoETSigEB->Integral() << std::endl;
   std::cout << "Number of events passing selection but not conversion Veto = " << phoETSigEB_noconv->Integral() << std::endl;
   std::cout << "Number of events in ratio of the two = " << FRSigEB->Integral() << std::endl;
+  std::cout << "Ratio of events with Conversion Veto to events without, R = " << phoETSigEB->Integral()/phoETSigEB_noconv->Integral() << " (barrel)" << std::endl;
 
   std::cout << "***********************EE Signal Events*************************" << std::endl;
   std::cout << "Number of signal events = " << phoETSigEE->Integral() << std::endl;
   std::cout << "Number of events passing selection but not conversion Veto = " << phoETSigEE_noconv->Integral() << std::endl;
   std::cout << "Number of events in ratio of the two = " << FRSigEE->Integral() << std::endl;
+  std::cout << "Ratio of events with Conversion Veto to events without, R = " << phoETSigEE->Integral()/phoETSigEE_noconv->Integral() << " (endcaps)" << std::endl;
 
+// Plotting section
 
-TCanvas* signalEB = new TCanvas("signalEB");
-	phoETSigEB->Draw();
-signalEB->SaveAs("Plots/phoETSigEB.pdf");
+doPlot(phoETSigEB);
+
 
 TCanvas* signalEBnoconv = new TCanvas("signalEBnoconv");
   phoETSigEB_noconv->Draw();
@@ -700,7 +707,6 @@ ratioSigEE->SaveAs("Plots/ratioSigEE.pdf");
   phoTotCheck_conv->Draw("colz");
 
   c2->SaveAs("Plots/phoCheckHists.pdf");
-  c2->SaveAs("Plots/phoCheckHists.png");
 
 
 }
@@ -877,7 +883,7 @@ bool isMatched(float pEta, float pPhi,
        &&(fabs((*mcMomPID)[imc]) !=6))continue;    
     if(verbose) std::cout << "       passed mother" << std::endl;*/
 
-    if(fabs((*mcMomPID)[imc]) != 11) continue;
+    if(fabs((*mcMomPID)[imc]) != 23) continue;
     if(verbose) std::cout << "       passed mother" << std::endl;
     
     double meta = (*mcEta)[imc];
@@ -935,4 +941,54 @@ void set_plot_style() {
     Double_t blue[NRGBs]  = { 0.51, 1.00, 0.12, 0.00, 0.00 };
     TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
     gStyle->SetNumberContours(NCont);
-}                                
+}            
+
+TText* doPreliminary(double x_pos,double y_pos){
+
+          ostringstream stream;
+          stream  << "CMS Preliminary";                                                                             
+
+          TLatex* text = new TLatex(x_pos, y_pos, stream.str().c_str());
+          text->SetNDC(true);
+          text->SetTextFont(62);
+          text->SetTextSize(0.03);  // for thesis
+
+          return text;
+}   
+
+void doPlot(TH1D* plot){
+
+TString name = string(plot->GetName());
+
+  TCanvas* can = new TCanvas("Plot","Plot",635, 600); 
+      plot->SetMaximum(plot->GetBinContent(plot->GetMaximumBin())*1.3);
+      plot->SetFillColor(kAzure+8);
+      //plot->SetFillColor(kTeal+8); 
+      plot->SetLineColor(kBlack);  
+      plot->Draw();
+
+      TText* prelim = doPreliminary(0.14, 0.82);
+      prelim->Draw("same");
+
+      TLegend* leg = doLegend(plot);
+      leg->Draw("same");
+
+  if(doLogPlot){    
+      can->SetLogy();
+      can->SaveAs("Plots/Log/"+name+".pdf");
+  }else{   
+      can->SaveAs("Plots/"+name+".pdf");
+  }    
+
+}      
+
+TLegend* doLegend(TH1D* plot){
+
+      TLegend* leg = new TLegend(0.70,0.48,0.90,0.88);
+      leg->SetTextSize(0.04);
+      leg->SetBorderSize(0);
+      leg->SetFillColor(10);
+      leg->AddEntry(plot , "2012 data", "lpe");
+      return leg;
+}           
+
