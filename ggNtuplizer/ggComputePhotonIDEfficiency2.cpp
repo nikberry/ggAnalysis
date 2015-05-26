@@ -865,27 +865,33 @@ bool isMatched(float pEta, float pPhi,
     			", " << (*mcPhi)[imc] << ")" << std::endl;
 		         
     double msts = (*mcStatus)[imc];
-    if((msts != 1)||((*mcPID)[imc] != 22)) continue;
+    if((msts != 1)||((*mcPID)[imc] != 11)) continue; //22
     if(verbose) std::cout << "      passed pid and status" << std::endl;
 
-    if((fabs((*mcMomPID)[imc]) !=21) 
+/*    if((fabs((*mcMomPID)[imc]) !=21) 
        &&(fabs((*mcMomPID)[imc]) !=1)
        &&(fabs((*mcMomPID)[imc]) !=2)
        &&(fabs((*mcMomPID)[imc]) !=3)
        &&(fabs((*mcMomPID)[imc]) !=4)
        &&(fabs((*mcMomPID)[imc]) !=5)
        &&(fabs((*mcMomPID)[imc]) !=6))continue;    
+    if(verbose) std::cout << "       passed mother" << std::endl;*/
+
+    if(fabs((*mcMomPID)[imc]) != 11) continue;
     if(verbose) std::cout << "       passed mother" << std::endl;
     
     double meta = (*mcEta)[imc];
     double mphi = (*mcPhi)[imc];
     
     TVector3 mcphoton;
+    TVector3 mcElectron;
     TVector3 recoPHOTOn;
-    mcphoton.SetPtEtaPhi(1.0,meta,mphi);
+  //  mcphoton.SetPtEtaPhi(1.0,meta,mphi);
+    mcElectron.SetPtEtaPhi(1.0,meta,mphi);
     recoPHOTOn.SetPtEtaPhi(1.0,pEta,pPhi);
     
-    double DR = mcphoton.DrEtaPhi(recoPHOTOn);
+//    double DR = mcphoton.DrEtaPhi(recoPHOTOn);
+    double DR = mcElectron.DrEtaPhi(recoPHOTOn);
     if(verbose) std::cout << "        dR= " << DR << std::endl;
     if(DR < 0.1 ){
       isMatched = true;
