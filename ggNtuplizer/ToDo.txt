@@ -1,0 +1,20 @@
+-Make sure using uptodate WP (medium) -- just need to fix the neutral hadron
+barrel somehow.
+-Apply selection
+-contact Ming regarding 8 TeV DY sample
+-Plot fake rate vs pT, eta, N_trks, PU, etc
+-Do I consider just barrel, or endcaps as well?
+-Pt between 30 and 200?
+-make better set-up with a photon collection and include an N-1 selection for
+all cuts
+
+
+Event Selection
+- > 2 photons
+- medium working point selection
+- matching
+- within Z-mass range 60-120 GeV
+- Passes Conversion Veto
+
+Fake Rate (efficiency)
+- To get efficiency (FR), compute signal (passes all cuts including conversion veto) divided by passes selection without conversion veto

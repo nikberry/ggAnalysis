@@ -18,7 +18,7 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "HiggsAnalysis/HiggsTo2photons/interface/CiCPhotonID.h"
-#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyToolsNew.h"
 #include "RecoEgamma/PhotonIdentification/interface/GEDPhoIDTools.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
@@ -90,9 +90,9 @@ class ggNtuplizer : public edm::EDAnalyzer {
   InputTag photonCollection_;
   InputTag muonCollection_;
   InputTag tauCollection_;
-  InputTag ebReducedRecHitCollection_;
-  InputTag eeReducedRecHitCollection_;
-  InputTag esReducedRecHitCollection_;
+  edm::EDGetTokenT<EcalRecHitCollection> ebReducedRecHitCollection_;
+  edm::EDGetTokenT<EcalRecHitCollection> eeReducedRecHitCollection_;
+  edm::EDGetTokenT<EcalRecHitCollection> esReducedRecHitCollection_;
   InputTag recophotonCollection_;
   InputTag tracklabel_;
   InputTag gsfElectronlabel_;
@@ -106,8 +106,8 @@ class ggNtuplizer : public edm::EDAnalyzer {
   TH1F    *hPU_;
   TH1F    *hPUTrue_;
 
-  EcalClusterLazyTools       *lazyTool;
-  noZS::EcalClusterLazyTools *lazyToolnoZS;
+  EcalClusterLazyToolsNew       *lazyTool;
+  noZS::EcalClusterLazyToolsNew *lazyToolnoZS;
   CiCPhotonID          *cicPhotonId_;
 
   Int_t          run_;

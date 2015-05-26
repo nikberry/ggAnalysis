@@ -3,9 +3,9 @@
 
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
-#include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
-#include <PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h>
-#include <PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h>
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterToolsNew.h"
+#include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
+#include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
 
 ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) {
 
@@ -21,22 +21,21 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) {
   electronCollection_        = ps.getParameter<InputTag>("electronSrc");
   photonCollection_          = ps.getParameter<InputTag>("photonSrc");
   muonCollection_            = ps.getParameter<InputTag>("muonSrc");
-  ebReducedRecHitCollection_ = ps.getParameter<InputTag>("ebReducedRecHitCollection");
-  eeReducedRecHitCollection_ = ps.getParameter<InputTag>("eeReducedRecHitCollection");
-  esReducedRecHitCollection_ = ps.getParameter<InputTag>("esReducedRecHitCollection");
+  ebReducedRecHitCollection_ = consumes<EcalRecHitCollection>(ps.getParameter<InputTag>("ebReducedRecHitCollection"));
+  eeReducedRecHitCollection_ = consumes<EcalRecHitCollection>(ps.getParameter<InputTag>("eeReducedRecHitCollection"));
+  esReducedRecHitCollection_ = consumes<EcalRecHitCollection>(ps.getParameter<InputTag>("esReducedRecHitCollection"));
   recophotonCollection_      = ps.getParameter<InputTag>("recoPhotonSrc");
   tracklabel_                = ps.getParameter<InputTag>("TrackLabel");
   gsfElectronlabel_          = ps.getParameter<InputTag>("gsfElectronLabel");
   pfAllParticles_            = ps.getParameter<InputTag>("PFAllCandidates");
   jetsCHSLabel_              = edm::InputTag("selectedPatJetsCA8PFCHS");
   jetCollection_             = ps.getParameter<InputTag>("jetSrc");
-  dumpJets_          = ps.getParameter<bool>("dumpJets");
-  dumpSubJets_       = ps.getParameter<bool>("dumpSubJets");
-  dumpTaus_       = ps.getParameter<bool>("dumpTaus");
-//@@Lvdp
- 
-  pfLooseId_ = ps.getParameter<edm::ParameterSet>("pfLooseId");
-  tauCollection_ = ps.getParameter<InputTag>("tauSrc");
+  dumpJets_                  = ps.getParameter<bool>("dumpJets");
+  dumpSubJets_               = ps.getParameter<bool>("dumpSubJets");
+  dumpTaus_                  = ps.getParameter<bool>("dumpTaus");
+  pfLooseId_                 = ps.getParameter<edm::ParameterSet>("pfLooseId");
+  tauCollection_             = ps.getParameter<InputTag>("tauSrc");
+
   cicPhotonId_ = new CiCPhotonID(ps);
 
   Service<TFileService> fs;
@@ -382,9 +381,9 @@ void ggNtuplizer::getHandles(const edm::Event & event,
   event.getByLabel(photonCollection_,          photonHandle);
   event.getByLabel(muonCollection_,            muonHandle);
   event.getByLabel(tauCollection_,             tauHandle);
-  event.getByLabel(ebReducedRecHitCollection_, EBReducedRecHits);
-  event.getByLabel(eeReducedRecHitCollection_, EEReducedRecHits);
-  event.getByLabel(esReducedRecHitCollection_, ESReducedRecHits);
+  event.getByToken(ebReducedRecHitCollection_, EBReducedRecHits);
+  event.getByToken(eeReducedRecHitCollection_, EEReducedRecHits);
+  event.getByToken(esReducedRecHitCollection_, ESReducedRecHits);
   event.getByLabel(recophotonCollection_,      recoPhotonHandle);
   event.getByLabel(tracklabel_,                tracksHandle);
   event.getByLabel(gsfElectronlabel_,          gsfElectronHandle);
@@ -404,8 +403,8 @@ void ggNtuplizer::analyze(const edm::Event& e, const edm::EventSetup& es) {
 
   GEDPhoIDTools *GEDIdTool = new GEDPhoIDTools(e);
 
-  lazyTool = new EcalClusterLazyTools(e, es, ebReducedRecHitCollection_, eeReducedRecHitCollection_, esReducedRecHitCollection_);
-  lazyToolnoZS = new noZS::EcalClusterLazyTools(e, es, ebReducedRecHitCollection_, eeReducedRecHitCollection_, esReducedRecHitCollection_);
+  lazyTool = new EcalClusterLazyToolsNew(e, es, ebReducedRecHitCollection_, eeReducedRecHitCollection_, esReducedRecHitCollection_);
+  lazyToolnoZS = new noZS::EcalClusterLazyToolsNew(e, es, ebReducedRecHitCollection_, eeReducedRecHitCollection_, esReducedRecHitCollection_);
 
   run_    = e.id().run();
   event_  = e.id().event();
@@ -624,7 +623,7 @@ void ggNtuplizer::analyze(const edm::Event& e, const edm::EventSetup& es) {
       eleSigmaIEtaIPhi_   .push_back(iEle->sigmaIetaIphi());
       eleSigmaIPhiIPhi_   .push_back(iEle->sigmaIphiIphi());
       eleConvVeto_        .push_back((Int_t)iEle->passConversionVeto()); // ConvVtxFit || missHit == 0
-      eleMissHits_        .push_back(iEle->gsfTrack()->trackerExpectedHitsInner().numberOfHits());
+      eleMissHits_        .push_back(iEle->gsfTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS));
       eleESEffSigmaRR_    .push_back(lazyTool->eseffsirir(*((*iEle).superCluster())));
       //elePFChIso_         .push_back(iEle->chargedHadronIso());
       //elePFPhoIso_        .push_back(iEle->photonIso());
