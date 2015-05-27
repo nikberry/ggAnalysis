@@ -65,6 +65,7 @@
 ./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TText.h
 ./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TAttText.h
 ./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TH1D.h
+./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TColor.h
 ./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TCanvas.h
 ./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TPad.h
 ./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TVirtualPad.h
@@ -93,7 +94,6 @@
 ./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TClass.h
 ./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TObjString.h
 ./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TVirtualTreePlayer.h
-./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TColor.h
 ./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/TStyle.h
 ./ggComputePhotonIDEfficiency2_cpp.so: /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/cintdictversion.h /home/cms/cmssw/slc6_amd64_gcc481/lcg/root/5.34.18-cms12/include/RVersion.h
 ggComputePhotonIDEfficiency2_cpp__ROOTBUILDVERSION= 5.34/18

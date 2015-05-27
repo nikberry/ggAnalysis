@@ -6,6 +6,7 @@
 #include "TLorentzVector.h"
 #include "TLatex.h"
 #include "TH1D.h"
+#include "TColor.h"
 #include "TMath.h"
 #include "TCanvas.h"
 #include "TFile.h"
@@ -71,7 +72,7 @@ bool isMatched(float pEta, float pPhi,
 
 void set_plot_style();
 TText* doPreliminary(double x_pos,double y_pos);
-void doPlot(TH1D* plot);
+void doPlot(TH1D* plot, Color_t fillColour);
 TLegend* doLegend(TH1D* plot);
 
 void ggComputePhotonIDEfficiency2()
@@ -95,19 +96,37 @@ void ggComputePhotonIDEfficiency2()
     assert(0);
   std::cout << "Found the tree" << std::endl; fflush(stdout);
   
-  TH1D *phoEtCheckHist_conv = new TH1D("phoEtCheckHistConv","",185, 15, 200);	
-        phoEtCheckHist_conv->GetXaxis()->SetTitle("E_{T} [GeV]");
-        phoEtCheckHist_conv->GetYaxis()->SetTitle("Number of events");
-        phoEtCheckHist_conv->SetFillColor(kAzure+8);
-        phoEtCheckHist_conv->SetLineColor(kBlack);      
-  TH1D *phoSCEtaCheckHist_conv = new TH1D("phoSCEtaCheckHistConv","",200, -5, 5);
-        phoSCEtaCheckHist_conv->GetXaxis()->SetTitle("#eta_{SC} [GeV]");
-        phoSCEtaCheckHist_conv->GetYaxis()->SetTitle("Number of events");
-        phoSCEtaCheckHist_conv->SetFillColor(kAzure+8);
-        phoSCEtaCheckHist_conv->SetLineColor(kBlack);
-  TH2D *phoTotCheck_conv = new TH2D("phoTotCheckConv","", 200, -5, 5, 185, 15, 200); 
-        phoTotCheck_conv->GetXaxis()->SetTitle("#eta_{SC}");
-        phoTotCheck_conv->GetYaxis()->SetTitle("E_{T} [GeV]"); 
+  //Set histos
+  //Event variables
+  TH1D* N_Pho = new TH1D("N_Pho", "", 12, 0, 12);
+        N_Pho->GetXaxis()->SetTitle("N_{#gamma}");
+        N_Pho->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* PU = new TH1D("PU", "", 90, 0, 90);
+        PU->GetXaxis()->SetTitle("PU");
+        PU->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* N_Trks = new TH1D("nTrks", "", 240, 0, 240);
+        N_Trks->GetXaxis()->SetTitle("N_{Tracks}");
+        N_Trks->GetYaxis()->SetTitle("Number of events");      
+
+  //Full detector
+  TH1D *phoETSigAll = new TH1D("phoETSigAll","",185, 15, 200);	
+        phoETSigAll->GetXaxis()->SetTitle("E_{T} [GeV]");
+        phoETSigAll->GetYaxis()->SetTitle("Number of events");    
+
+  TH1D *phoEtaSigAll = new TH1D("phoETaSigAll","",200, -5, 5);
+        phoEtaSigAll->GetXaxis()->SetTitle("#eta_{SC} [GeV]");
+        phoEtaSigAll->GetYaxis()->SetTitle("Number of events");
+
+  TH2D *phoETvsEtaSigAll = new TH2D("phoETvsEtaSigAll","", 200, -5, 5, 185, 15, 200); 
+        phoETvsEtaSigAll->GetXaxis()->SetTitle("#eta_{SC}");
+        phoETvsEtaSigAll->GetYaxis()->SetTitle("E_{T} [GeV]"); 
+
+  TH1D* phoPhiSigAll = new TH1D("phoPhiSigAll", "", 200, -4, 4);
+        phoPhiSigAll->GetXaxis()->SetTitle("#phi");
+        phoPhiSigAll->GetYaxis()->SetTitle("Number of events");
+
   
   //barrel histos
   TH1D* phoETSigEB = new TH1D("phoETSigEB", "", 185, 15, 200);
@@ -117,24 +136,54 @@ void ggComputePhotonIDEfficiency2()
   TH1D* phoETSigEB_noconv = new TH1D("phoETSigEB_noconv", "", 185, 15, 200); 
     	  phoETSigEB_noconv->GetXaxis()->SetTitle("E_{T} [GeV]");
 	      phoETSigEB_noconv->GetYaxis()->SetTitle("Number of events");
-        phoETSigEB_noconv->SetFillColor(kAzure+8);
-        phoETSigEB_noconv->SetLineColor(kBlack);
+
+  TH1D* phoEtaSigEB = new TH1D("phoEtaSigEB", "", 200, -3, 3);
+        phoEtaSigEB->GetXaxis()->SetTitle("#eta_{SC}");
+        phoEtaSigEB->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* phoEtaSigEB_noconv = new TH1D("phoEtaSigEB_noconv", "", 200, -3, 3);
+        phoEtaSigEB_noconv->GetXaxis()->SetTitle("#eta_{SC}");
+        phoEtaSigEB_noconv->GetYaxis()->SetTitle("Number of events");         
   
+  TH1D* phoPhiSigEB = new TH1D("phoPhiSigEB", "", 200, -4, 4);
+        phoPhiSigEB->GetXaxis()->SetTitle("#phi");
+        phoPhiSigEB->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* phoPhiSigEB_noconv = new TH1D("phoPhiSigEB_noconv", "", 200, -4, 4);
+        phoPhiSigEB_noconv->GetXaxis()->SetTitle("#phi");
+        phoPhiSigEB_noconv->GetYaxis()->SetTitle("Number of events");
+
   //endcap histos
   TH1D* phoETSigEE = new TH1D("phoETSigEE", "", 185, 15, 200);
     	  phoETSigEE->GetXaxis()->SetTitle("E_{T} [GeV]");
 	      phoETSigEE->GetYaxis()->SetTitle("Number of events");
-        phoETSigEE->SetFillColor(kTeal+8);
-        phoETSigEE->SetLineColor(kBlack);
+
   TH1D* phoETSigEE_noconv = new TH1D("phoETSigEE_noconv", "", 185, 15, 200);  
     	  phoETSigEE_noconv->GetXaxis()->SetTitle("E_{T} [GeV]");
 	      phoETSigEE_noconv->GetYaxis()->SetTitle("Number of events");
-        phoETSigEE_noconv->SetFillColor(kTeal+8);
-        phoETSigEE_noconv->SetLineColor(kBlack);
+
+  TH1D* phoEtaSigEE = new TH1D("phoEtaSigEE", "", 200, -3, 3);
+        phoEtaSigEE->GetXaxis()->SetTitle("#eta_{SC}");
+        phoEtaSigEE->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* phoEtaSigEE_noconv = new TH1D("phoEtaSigEE_noconv", "", 200, -3, 3);
+        phoEtaSigEE_noconv->GetXaxis()->SetTitle("#eta_{SC}");
+        phoEtaSigEE_noconv->GetYaxis()->SetTitle("Number of events");      
+
+  TH1D* phoPhiSigEE = new TH1D("phoPhiSigEE", "", 200, -4, 4);
+        phoPhiSigEE->GetXaxis()->SetTitle("#phi");
+        phoPhiSigEE->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* phoPhiSigEE_noconv = new TH1D("phoPhiSigEE_noconv", "", 200, -4, 4);
+        phoPhiSigEE_noconv->GetXaxis()->SetTitle("#phi");
+        phoPhiSigEE_noconv->GetYaxis()->SetTitle("Number of events"); 
+
   
-  // Event-level variables:
+  // Event-level variables:   
   int nPho;
   float rho;
+  int nPU;
+  int nTrksPV;
   
   // Per-photon variables
   // Kinematics
@@ -164,6 +213,8 @@ void ggComputePhotonIDEfficiency2()
   // Declare branches
   TBranch *b_nPho = 0;
   TBranch *b_rho = 0;
+  TBranch *b_nPU = 0;
+  TBranch *b_nTrksPV = 0;
   TBranch *b_phoEt = 0;
   TBranch *b_phoSCEta = 0;
   TBranch *b_phoPhi = 0;
@@ -186,6 +237,8 @@ void ggComputePhotonIDEfficiency2()
   // Connect variables and branches to the tree with the data
   tree->SetBranchAddress("nPho", &nPho, &b_nPho);
   tree->SetBranchAddress("rho", &rho, &b_rho);
+  tree->SetBranchAddress("nPU", &nPU, &b_nPU);
+  tree->SetBranchAddress("nTrksPV", &nTrksPV, &b_nTrksPV);
   tree->SetBranchAddress("phoEt", &phoEt, &b_phoEt);
   tree->SetBranchAddress("phoSCEta", &phoSCEta, &b_phoSCEta);
   tree->SetBranchAddress("phoPhi", &phoPhi, &b_phoPhi);
@@ -320,6 +373,9 @@ can2->SaveAs("Plots/Background.pdf");
     // Load the value of the number of the photons in the event    
     b_nPho->GetEntry(tentry);
     b_rho->GetEntry(tentry);
+   // b_nPU->GetEntry(tentry);
+   // b_nTrksPV->GetEntry(tentry);
+
     if(verbose)
       std::cout << "Event " << ievent << ", number of photons " << nPho << std::endl;
 
@@ -350,12 +406,7 @@ can2->SaveAs("Plots/Background.pdf");
       if( !( phoEleVeto->at(ipho) == 1) ) continue;
 //      if( !( phohasPixelSeed->at(ipho) == 0 ) ) continue;
      // if( nPho < 2 ) continue; 
-      
-  //    photon.push_back(phoEt->at(ipho));
-  //    photon.push_back(phoSCEta->at(ipho));
-  //    photon.push_back(phoPhi->at(ipho));
-  //    photonCollection.push_back(photon);
-   
+         
 //      bool withinZMassRange = passesZmass(photonCollection);
 
       bool isBarrel = (fabs(phoSCEta->at(ipho)) < barrelEtaLimit);
@@ -400,9 +451,10 @@ can2->SaveAs("Plots/Background.pdf");
       
 
   if( isTrue ) {
-	 phoEtCheckHist_conv->Fill(phoEt->at(ipho), weight);
-	 phoSCEtaCheckHist_conv->Fill(phoSCEta->at(ipho), weight);
-	 phoTotCheck_conv->Fill(phoSCEta->at(ipho), phoEt->at(ipho), weight);
+	 phoETSigAll->Fill(phoEt->at(ipho), weight);
+	 phoEtaSigAll->Fill(phoSCEta->at(ipho), weight);
+   phoPhiSigAll->Fill(phoPhi->at(ipho), weight);
+	 phoETvsEtaSigAll->Fill(phoSCEta->at(ipho), phoEt->at(ipho), weight);
 
 	  	
 
@@ -417,6 +469,8 @@ can2->SaveAs("Plots/Background.pdf");
 	    sumSignalNumEBErr2 += weight*weight;
 	    
 	    phoETSigEB->Fill(phoEt->at(ipho), weight);
+      phoEtaSigEB->Fill(phoSCEta->at(ipho), weight);
+      phoPhiSigEB->Fill(phoPhi->at(ipho), weight);
 
 	  }
 	 } else if( isEndcap ){
@@ -427,6 +481,8 @@ can2->SaveAs("Plots/Background.pdf");
 	    sumSignalNumEEErr2 += weight*weight;
 	    
 	    phoETSigEE->Fill(phoEt->at(ipho), weight);
+      phoEtaSigEE->Fill(phoSCEta->at(ipho), weight);
+      phoPhiSigEE->Fill(phoPhi->at(ipho), weight);
 
 	  }
 
@@ -566,6 +622,8 @@ for(UInt_t ievent = 0; ievent < maxEvents; ievent++){
 	    //sumSignalNumEBErr2 += weight*weight;
 	    
 	    phoETSigEB_noconv->Fill(phoEt->at(ipho), weight);
+      phoEtaSigEB_noconv->Fill(phoSCEta->at(ipho), weight);
+      phoPhiSigEB_noconv->Fill(phoPhi->at(ipho), weight);
 
 	  }
 	} else if( isEndcap ){
@@ -576,6 +634,8 @@ for(UInt_t ievent = 0; ievent < maxEvents; ievent++){
 	   // sumSignalNumEEErr2 += weight*weight;
 	    
 	    phoETSigEE_noconv->Fill(phoEt->at(ipho), weight);
+      phoEtaSigEE_noconv->Fill(phoSCEta->at(ipho), weight);
+      phoPhiSigEE_noconv->Fill(phoPhi->at(ipho), weight);
 
 	  }
 
@@ -608,6 +668,9 @@ for(UInt_t ievent = 0; ievent < maxEvents; ievent++){
       } // end if background
     } // end loop over photons
     
+ //   N_Pho_noconv->Fill(nPho->at(ipho), weight);
+ //   PU_noconv->Fill(nPU->at(ipho), weight);
+ //   N_Trks_noconv->Fill(nTrksPV->at(ipho), weight);
 
 }// end loop over events  
 
@@ -632,30 +695,66 @@ TH1D* FRSigEE = (TH1D*)phoETSigEE->Clone("FR");
   std::cout << "Number of events in ratio of the two = " << FRSigEE->Integral() << std::endl;
   std::cout << "Ratio of events with Conversion Veto to events without, R = " << phoETSigEE->Integral()/phoETSigEE_noconv->Integral() << " (endcaps)" << std::endl;
 
+  std::vector<TH1D*> barrelHistos;
+
+  barrelHistos.push_back(phoETSigEB);
+  barrelHistos.push_back(phoETSigEB_noconv);
+  barrelHistos.push_back(phoEtaSigEB);
+  barrelHistos.push_back(phoEtaSigEB_noconv);
+  barrelHistos.push_back(phoPhiSigEB);
+  barrelHistos.push_back(phoPhiSigEB_noconv); 
+
+  std::vector<TH1D*> endcapHistos;
+
+  endcapHistos.push_back(phoETSigEE);
+  endcapHistos.push_back(phoETSigEE_noconv);
+  endcapHistos.push_back(phoEtaSigEE);
+  endcapHistos.push_back(phoEtaSigEE_noconv);
+  endcapHistos.push_back(phoPhiSigEE);
+  endcapHistos.push_back(phoPhiSigEE_noconv);
+
+  std::vector<TH1D*> fullHistos;
+
+  fullHistos.push_back(phoETSigAll);
+//  endcapHistos.push_back(phoETSigAll_noconv);
+  fullHistos.push_back(phoEtaSigAll);
+//  endcapHistos.push_back(phoEtaSigAll_noconv);
+  fullHistos.push_back(phoPhiSigAll);
+//  endcapHistos.push_back(phoPhiSigAll_noconv);
+ // fullHistos.push_back(N_Pho);
+ // fullHistos.push_back(PU);
+ // fullHistos.push_back(N_Trks);
+
 // Plotting section
+for (unsigned int i = 0; i < barrelHistos.size(); ++i)
+{
+  doPlot(barrelHistos[i], kAzure+8);
+}
 
-doPlot(phoETSigEB);
+for (unsigned int i = 0; i < endcapHistos.size(); ++i)
+{
+  doPlot(endcapHistos[i], kTeal+8);
+}
+
+for (unsigned int i = 0; i < fullHistos.size(); ++i)
+{
+  doPlot(fullHistos[i], kRed+2);
+}
+
+  TCanvas *c2 = new TCanvas("c2","c2",10,10,900, 600);
+
+          phoETvsEtaSigAll->Draw("colz");
+
+  c2->SaveAs("Plots/phoETvsEtaSigAll.pdf");
 
 
-TCanvas* signalEBnoconv = new TCanvas("signalEBnoconv");
-  phoETSigEB_noconv->Draw();
-signalEBnoconv->SaveAs("Plots/phoETSigEB_noconv.pdf");
+  TH1D* num = (TH1D*)phoETSigEB->Clone("num");
+  TH1D* denom = (TH1D*)phoETSigEB_noconv->Clone("denom");
+        denom->Add(num);
+  num->Divide(denom);     
 
-TCanvas* ratioSigEB = new TCanvas("ratioSigEB");
-  FRSigEB->Draw();
-ratioSigEB->SaveAs("Plots/ratioSigEB.pdf");
+  std::cout << "number of events in num = " << num->Integral() << ", denom = " << denom->Integral() << ", Fake rate = " << std::endl;
 
-TCanvas* signalEE = new TCanvas("signalEE");
-  phoETSigEE->Draw();
-signalEE->SaveAs("Plots/phoETSigEE.pdf");
-
-TCanvas* signalEEnoconv = new TCanvas("signalEEnoconv");
-  phoETSigEE_noconv->Draw();
-signalEEnoconv->SaveAs("Plots/phoETSigEE_noconv.pdf");
-
-TCanvas* ratioSigEE = new TCanvas("ratioSigEE");
-  FRSigEE->Draw();
-ratioSigEE->SaveAs("Plots/ratioSigEE.pdf");
 
 
   std::cout << "barrel signal a=" << sumSignalNumEB << "   b=" << sumSignalDenomEB << std::endl;
@@ -697,17 +796,6 @@ ratioSigEE->SaveAs("Plots/ratioSigEE.pdf");
   std::cout << " signal photons: " << nSigBarrel << "    weighted:   " << nSigBarrelWeighted << std::endl;
   std::cout << " backgr photons: " << nBgBarrel << "    weighted:   " << nBgBarrelWeighted << std::endl;
   
-  TCanvas *c2 = new TCanvas("c2","c2",10,10,900, 600);
-  c2->Divide(3,1);
-  c2->cd(1);
-  phoEtCheckHist_conv->Draw();
-  c2->cd(2);
-  phoSCEtaCheckHist_conv->Draw();
-  c2->cd(3);
-  phoTotCheck_conv->Draw("colz");
-
-  c2->SaveAs("Plots/phoCheckHists.pdf");
-
 
 }
 
@@ -901,7 +989,7 @@ bool isMatched(float pEta, float pPhi,
     if(verbose) std::cout << "        dR= " << DR << std::endl;
     if(DR < 0.1 ){
       isMatched = true;
-      if(verbose) std::cout << "         PASSE ALL" << std::endl;
+      if(verbose) std::cout << "         PASSED ALL" << std::endl;
       // genPt = (*mcPt)[imc];
       break;
     }  
@@ -956,18 +1044,19 @@ TText* doPreliminary(double x_pos,double y_pos){
           return text;
 }   
 
-void doPlot(TH1D* plot){
+void doPlot(TH1D* plot, Color_t fillColour){
 
 TString name = string(plot->GetName());
 
   TCanvas* can = new TCanvas("Plot","Plot",635, 600); 
-      plot->SetMaximum(plot->GetBinContent(plot->GetMaximumBin())*1.3);
-      plot->SetFillColor(kAzure+8);
-      //plot->SetFillColor(kTeal+8); 
+      
+      plot->SetFillColor(fillColour); 
       plot->SetLineColor(kBlack);  
+      plot->Rebin(5);
+      plot->SetMaximum(plot->GetBinContent(plot->GetMaximumBin())*1.3);
       plot->Draw();
 
-      TText* prelim = doPreliminary(0.14, 0.82);
+      TText* prelim = doPreliminary(0.14, 0.84);
       prelim->Draw("same");
 
       TLegend* leg = doLegend(plot);
@@ -980,15 +1069,19 @@ TString name = string(plot->GetName());
       can->SaveAs("Plots/"+name+".pdf");
   }    
 
+  delete can;
+  delete prelim;
+  delete leg;
+
 }      
 
 TLegend* doLegend(TH1D* plot){
 
-      TLegend* leg = new TLegend(0.70,0.48,0.90,0.88);
+      TLegend* leg = new TLegend(0.65,0.82,0.85,0.88);
       leg->SetTextSize(0.04);
       leg->SetBorderSize(0);
       leg->SetFillColor(10);
-      leg->AddEntry(plot , "2012 data", "lpe");
+      leg->AddEntry(plot , "DY 20bx25", "f");
       return leg;
 }           
 
