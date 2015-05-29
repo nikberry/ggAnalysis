@@ -102,18 +102,54 @@ void ggComputePhotonIDEfficiency2()
         N_Pho->GetXaxis()->SetTitle("N_{#gamma}");
         N_Pho->GetYaxis()->SetTitle("Number of events");
 
-  TH1D* PU = new TH1D("PU", "", 90, 0, 90);
-        PU->GetXaxis()->SetTitle("PU");
-        PU->GetYaxis()->SetTitle("Number of events");
+  TH1D* PUSigAll = new TH1D("PUSigAll", "", 90, 0, 90);
+        PUSigAll->GetXaxis()->SetTitle("PU");
+        PUSigAll->GetYaxis()->SetTitle("Number of events");
 
-  TH1D* N_Trks = new TH1D("nTrks", "", 240, 0, 240);
-        N_Trks->GetXaxis()->SetTitle("N_{Tracks}");
-        N_Trks->GetYaxis()->SetTitle("Number of events");      
+  TH1D* PUSigEB = new TH1D("PUSigEB", "", 90, 0, 90);
+        PUSigEB->GetXaxis()->SetTitle("PU");
+        PUSigEB->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* PUSigEE = new TH1D("PUSigEE", "", 90, 0, 90);
+        PUSigEE->GetXaxis()->SetTitle("PU");
+        PUSigEE->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* PUSigEB_noconv = new TH1D("PUSigEB_noconv", "", 90, 0, 90);
+        PUSigEB_noconv->GetXaxis()->SetTitle("PU");
+        PUSigEB_noconv->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* PUSigEE_noconv = new TH1D("PUSigEE_noconv", "", 90, 0, 90);
+        PUSigEE_noconv->GetXaxis()->SetTitle("PU");
+        PUSigEE_noconv->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* nTrksSigAll = new TH1D("nTrksSigAll", "", 240, 0, 240);
+        nTrksSigAll->GetXaxis()->SetTitle("N_{Tracks}");
+        nTrksSigAll->GetYaxis()->SetTitle("Number of events");  
+
+  TH1D* nTrksSigEB = new TH1D("nTrksSigEB", "", 240, 0, 240);
+        nTrksSigEB->GetXaxis()->SetTitle("N_{Tracks}");
+        nTrksSigEB->GetYaxis()->SetTitle("Number of events"); 
+        
+  TH1D* nTrksSigEE = new TH1D("nTrksSigEE", "", 240, 0, 240);
+        nTrksSigEE->GetXaxis()->SetTitle("N_{Tracks}");
+        nTrksSigEE->GetYaxis()->SetTitle("Number of events"); 
+
+  TH1D* nTrksSigEB_noconv = new TH1D("nTrksSigEB_noconv", "", 240, 0, 240);
+        nTrksSigEB_noconv->GetXaxis()->SetTitle("N_{Tracks}");
+        nTrksSigEB_noconv->GetYaxis()->SetTitle("Number of events"); 
+
+  TH1D* nTrksSigEE_noconv = new TH1D("nTrksSigEE_noconv", "", 240, 0, 240);
+        nTrksSigEE_noconv->GetXaxis()->SetTitle("N_{Tracks}");
+        nTrksSigEE_noconv->GetYaxis()->SetTitle("Number of events");           
 
   //Full detector
   TH1D *phoETSigAll = new TH1D("phoETSigAll","",185, 15, 200);	
         phoETSigAll->GetXaxis()->SetTitle("E_{T} [GeV]");
         phoETSigAll->GetYaxis()->SetTitle("Number of events");    
+
+  TH1D *phoETSigAll_noconv = new TH1D("phoETSigAll_noconv","",185, 15, 200);  
+        phoETSigAll_noconv->GetXaxis()->SetTitle("E_{T} [GeV]");
+        phoETSigAll_noconv->GetYaxis()->SetTitle("Number of events"); 
 
   TH1D *phoEtaSigAll = new TH1D("phoETaSigAll","",200, -5, 5);
         phoEtaSigAll->GetXaxis()->SetTitle("#eta_{SC} [GeV]");
@@ -178,13 +214,17 @@ void ggComputePhotonIDEfficiency2()
         phoPhiSigEE_noconv->GetXaxis()->SetTitle("#phi");
         phoPhiSigEE_noconv->GetYaxis()->SetTitle("Number of events"); 
 
+  TH2D* FRvsET = new TH2D("FRvsET", "", 185, 15, 200, 185, 15, 200);
+        FRvsET->GetXaxis()->SetTitle("E_{T} [GeV]");
+        FRvsET->GetYaxis()->SetTitle("Fake Rate");     
+             
   
   // Event-level variables:   
   int nPho;
   float rho;
-  int nPU;
-  int nTrksPV;
-  
+  std::vector<int> *nPU = 0;
+  int *nTrksPV;  
+
   // Per-photon variables
   // Kinematics
   std::vector <float> *phoEt = 0;     
@@ -282,6 +322,8 @@ void ggComputePhotonIDEfficiency2()
     
     // Load the value of the number of the photons in the event    
     b_nPho->GetEntry(tentry);
+    b_nPU->GetEntry(tentry);
+    b_nTrksPV->GetEntry(tentry);
 
     // Get data for all photons in this event, only vars of interest
     b_phoEt->GetEntry(tentry);
@@ -297,6 +339,7 @@ void ggComputePhotonIDEfficiency2()
     b_mcPhi->GetEntry(tentry);
 
     b_eleConvVeto->GetEntry(tentry);
+    
 
     // Loop over photons
     for(int ipho = 0; ipho < nPho; ipho++){
@@ -312,6 +355,7 @@ void ggComputePhotonIDEfficiency2()
 
       if( isTrue ) {
 	hSignal->Fill( phoSCEta->at(ipho), phoEt->at(ipho) );
+
       }else{
 	hBackground->Fill( phoSCEta->at(ipho), phoEt->at(ipho) );
       }
@@ -373,8 +417,8 @@ can2->SaveAs("Plots/Background.pdf");
     // Load the value of the number of the photons in the event    
     b_nPho->GetEntry(tentry);
     b_rho->GetEntry(tentry);
-   // b_nPU->GetEntry(tentry);
-   // b_nTrksPV->GetEntry(tentry);
+    b_nPU->GetEntry(tentry);
+    b_nTrksPV->GetEntry(tentry);
 
     if(verbose)
       std::cout << "Event " << ievent << ", number of photons " << nPho << std::endl;
@@ -397,6 +441,7 @@ can2->SaveAs("Plots/Background.pdf");
     b_mcStatus->GetEntry(tentry);
     b_mcEta->GetEntry(tentry);
     b_mcPhi->GetEntry(tentry);
+
 
     // Loop over photons
     for(int ipho = 0; ipho < nPho; ipho++){
@@ -455,7 +500,8 @@ can2->SaveAs("Plots/Background.pdf");
 	 phoEtaSigAll->Fill(phoSCEta->at(ipho), weight);
    phoPhiSigAll->Fill(phoPhi->at(ipho), weight);
 	 phoETvsEtaSigAll->Fill(phoSCEta->at(ipho), phoEt->at(ipho), weight);
-
+   PUSigAll->Fill(nPU->at(ipho), weight);
+   //nTrksSigAll->Fill(nTrksPV->at(ievent), weight);
 	  	
 
 	 if( isBarrel ) {
@@ -471,6 +517,8 @@ can2->SaveAs("Plots/Background.pdf");
 	    phoETSigEB->Fill(phoEt->at(ipho), weight);
       phoEtaSigEB->Fill(phoSCEta->at(ipho), weight);
       phoPhiSigEB->Fill(phoPhi->at(ipho), weight);
+      PUSigEB->Fill(nPU->at(ipho), weight);
+      //nTrksSigEB->Fill(nTrksPV->at(ipho), weight);
 
 	  }
 	 } else if( isEndcap ){
@@ -483,6 +531,8 @@ can2->SaveAs("Plots/Background.pdf");
 	    phoETSigEE->Fill(phoEt->at(ipho), weight);
       phoEtaSigEE->Fill(phoSCEta->at(ipho), weight);
       phoPhiSigEE->Fill(phoPhi->at(ipho), weight);
+      PUSigEE->Fill(nPU->at(ipho), weight);
+      //nTrksSigEE->Fill(nTrksPV->at(ipho), weight);
 
 	  }
 
@@ -514,8 +564,7 @@ can2->SaveAs("Plots/Background.pdf");
 	}// end barrel / endcap
       } // end if background
     } // end loop over photons
-    
-	
+
 }// end loop over events  
 
 
@@ -531,6 +580,8 @@ for(UInt_t ievent = 0; ievent < maxEvents; ievent++){
     // Load the value of the number of the photons in the event    
     b_nPho->GetEntry(tentry);
     b_rho->GetEntry(tentry);
+    b_nPU->GetEntry(tentry);
+
     if(verbose)
       std::cout << "Event " << ievent << ", number of photons " << nPho << std::endl;
 
@@ -608,6 +659,7 @@ for(UInt_t ievent = 0; ievent < maxEvents; ievent++){
 	//phoEtCheckHist_conv->Fill(phoEt->at(ipho), weight);
 	//phoSCEtaCheckHist_conv->Fill(phoSCEta->at(ipho), weight);
 	//phoTotCheck_conv->Fill(phoSCEta->at(ipho), phoEt->at(ipho), weight);
+    phoETSigAll_noconv->Fill(phoEt->at(ipho), weight);
 
 	  	
 
@@ -624,6 +676,8 @@ for(UInt_t ievent = 0; ievent < maxEvents; ievent++){
 	    phoETSigEB_noconv->Fill(phoEt->at(ipho), weight);
       phoEtaSigEB_noconv->Fill(phoSCEta->at(ipho), weight);
       phoPhiSigEB_noconv->Fill(phoPhi->at(ipho), weight);
+      PUSigEB_noconv->Fill(nPU->at(ipho), weight);
+      //nTrksSigEB_noconv->Fill(nTrksPV->at(ipho), weight);
 
 	  }
 	} else if( isEndcap ){
@@ -636,6 +690,8 @@ for(UInt_t ievent = 0; ievent < maxEvents; ievent++){
 	    phoETSigEE_noconv->Fill(phoEt->at(ipho), weight);
       phoEtaSigEE_noconv->Fill(phoSCEta->at(ipho), weight);
       phoPhiSigEE_noconv->Fill(phoPhi->at(ipho), weight);
+      PUSigEE_noconv->Fill(nPU->at(ipho), weight);
+      //nTrksSigEE_noconv->Fill(nTrksPV->at(ipho), weight);
 
 	  }
 
@@ -674,13 +730,186 @@ for(UInt_t ievent = 0; ievent < maxEvents; ievent++){
 
 }// end loop over events  
 
-TH1D* FRSigEB = (TH1D*)phoETSigEB->Clone("FR");
-      FRSigEB->SetFillColor(kAzure+8);
-  FRSigEB->Divide(phoETSigEB_noconv);
+///=========Fourth loop for creating 2D plot for fake rate with a variable===========
 
-TH1D* FRSigEE = (TH1D*)phoETSigEE->Clone("FR");
-      FRSigEB->SetFillColor(kTeal+8);
-  FRSigEE->Divide(phoETSigEE_noconv);  
+for(UInt_t ievent = 0; ievent < maxEvents; ievent++){
+
+    if( ievent%100000 == 0){
+      std::cout << "." ; fflush(stdout);
+    }
+    Long64_t tentry = tree->LoadTree(ievent);
+
+    // Load the value of the number of the photons in the event    
+    b_nPho->GetEntry(tentry);
+    b_rho->GetEntry(tentry);
+    b_nPU->GetEntry(tentry);
+    b_nTrksPV->GetEntry(tentry);
+
+    if(verbose)
+      std::cout << "Event " << ievent << ", number of photons " << nPho << std::endl;
+
+    // Get data for all photons in this event, only vars of interest
+    b_phoEt->GetEntry(tentry);
+    b_phoSCEta->GetEntry(tentry);
+    b_phoPhi->GetEntry(tentry);
+    b_phoSigmaIEtaIEta_2012->GetEntry(tentry);
+    b_phoHoverE->GetEntry(tentry);
+    b_phoPFPhoIso->GetEntry(tentry);
+    b_phoPFChIso->GetEntry(tentry);
+    b_phoPFNeuIso->GetEntry(tentry);
+    b_phohasPixelSeed->GetEntry(tentry);
+    b_phoEleVeto->GetEntry(tentry);
+    b_eleConvVeto->GetEntry(tentry);
+
+    b_mcPID->GetEntry(tentry);
+    b_mcMomPID->GetEntry(tentry);
+    b_mcStatus->GetEntry(tentry);
+    b_mcEta->GetEntry(tentry);
+    b_mcPhi->GetEntry(tentry);
+
+    // Loop over photons
+    for(int ipho = 0; ipho < nPho; ipho++){
+      
+      // Preselection
+      if( !(phoEt->at(ipho) > ptMin && phoEt->at(ipho) < ptMax ) ) continue;
+//      if( !( phoEleVeto->at(ipho) == 0) ) continue;
+//      if( !( phohasPixelSeed->at(ipho) == 0 ) ) continue;
+//      if( nPho < 2 ) continue; 
+
+//      bool withinZMassRange = passesZmass();
+
+      bool isBarrel = (fabs(phoSCEta->at(ipho)) < barrelEtaLimit);
+      bool isEndcap = (endcapLowerEtaLimit < fabs(phoSCEta->at(ipho)) && fabs(phoSCEta->at(ipho)) < endcapUpperEtaLimit);
+
+      // Correct for pile-up
+      float chIsoWithEA = computeIso(CH_ISO, 
+             phoPFChIso->at(ipho), 
+             phoSCEta->at(ipho), rho);
+      float nhIsoWithEA = computeIso(NH_ISO, 
+             phoPFNeuIso->at(ipho), 
+             phoSCEta->at(ipho), rho);
+      float phIsoWithEA = computeIso(PH_ISO, 
+             phoPFPhoIso->at(ipho), 
+             phoSCEta->at(ipho), rho);
+
+      // Compute ID decision
+      bool pass = passWorkingPoint( wp, isBarrel, phoEt->at(ipho),
+            phoHoverE->at(ipho),
+            phoSigmaIEtaIEta_2012->at(ipho),
+            chIsoWithEA, nhIsoWithEA, phIsoWithEA);
+
+      // Match to MC truth
+      bool isTrue = isMatched( phoSCEta->at(ipho), phoPhi->at(ipho),
+             mcPID, mcMomPID, mcStatus,
+             mcEta, mcPhi);
+      
+      // We reweight signal and background (separately) to have 
+      // a flat pt and eta distribution. This step is a matter of definition.
+      double binContent = 0;
+      TH2D *hEvents = hSignal;
+      if( !isTrue )
+  hEvents = hBackground;
+      binContent = hEvents->GetBinContent( hEvents->FindBin( phoSCEta->at(ipho), phoEt->at(ipho) ) );
+      double weight = 1;
+      if( binContent == 0 ){
+        std::cout << "Error! Zero! pt= "<< phoEt->at(ipho) << ", eta= " << phoSCEta->at(ipho) << std::endl;
+      }else{
+        weight = 1./binContent;
+      }
+      
+float ET, ET_noconv;
+
+  if( isTrue && pass && isBarrel && (phoEleVeto->at(ipho) == 0)){
+
+        ET = phoEt->at(ipho);
+  }
+
+  if( isTrue && pass && isBarrel && (phoEleVeto->at(ipho) == 1)){
+    
+        ET_noconv = phoEt->at(ipho);
+  }
+
+  float denom = ET + ET_noconv;
+  float fakerate = ET/denom;
+  //std::cout << "fakerate " << fakerate << std::endl;
+  //std::cout << "ET " << ET << " ET_noconv " << ET_noconv << " ET+ET_noconv " << ET+ET_noconv <<
+               //" ET/(ET+ET_noconv) " << ET/(ET+ET_noconv) << " ET/denom " << ET/denom << std::endl;
+  FRvsET->Fill(ET, fakerate, weight);
+
+  if( isTrue ) {
+      
+
+  if( isBarrel ) {
+    //nSigBarrel++;
+    //nSigBarrelWeighted += weight;
+    //sumSignalDenomEB += weight;
+    //sumSignalDenomEBErr2 += weight*weight;
+
+    if( pass ) {
+      //sumSignalNumEB += weight;
+      //sumSignalNumEBErr2 += weight*weight;
+    
+
+    }
+  } else if( isEndcap ){
+    //sumSignalDenomEE += weight;
+    //sumSignalDenomEEErr2 += weight*weight;    
+    if( pass ) {
+     // sumSignalNumEE += weight;
+     // sumSignalNumEEErr2 += weight*weight;
+      
+
+    }
+
+  }// end barrel / endcap
+      } // end if signal
+  
+
+      if( !isTrue ) {
+      
+  
+  if( isBarrel ) {
+    //nBgBarrel++;
+    //nBgBarrelWeighted += weight;
+    
+    //sumBackDenomEB += weight;
+    //sumBackDenomEBErr2 += weight*weight;
+    if( pass ) {
+    //  sumBackNumEB += weight;
+    //  sumBackNumEBErr2 += weight*weight;
+    }
+  } else if( isEndcap ){
+  //  sumBackDenomEE += weight;
+  //  sumBackDenomEEErr2 += weight*weight;    
+    if( pass ) {
+  //    sumBackNumEE += weight;
+  //    sumBackNumEEErr2 += weight*weight;
+    }
+
+  }// end barrel / endcap
+      } // end if background
+    } // end loop over photons
+    
+ //   N_Pho_noconv->Fill(nPho->at(ipho), weight);
+ //   PU_noconv->Fill(nPU->at(ipho), weight);
+ //   N_Trks_noconv->Fill(nTrksPV->at(ipho), weight);
+
+}// end loop over events  
+
+TH1D* FRSigEB = (TH1D*)phoETSigEB->Clone("FRSigEB");
+      FRSigEB->GetXaxis()->SetTitle("Fake Rate");  
+      FRSigEB->GetYaxis()->SetTitle("Number of events"); 
+      FRSigEB->Divide(phoETSigEB_noconv);
+
+TH1D* FRSigEE = (TH1D*)phoETSigEE->Clone("FRSigEE");
+      FRSigEE->GetXaxis()->SetTitle("Fake Rate");  
+      FRSigEE->GetYaxis()->SetTitle("Number of events"); 
+      FRSigEE->Divide(phoETSigEE_noconv);  
+
+TH1D* FRSigAll = (TH1D*)phoETSigAll->Clone("FRSigAll");
+      FRSigAll->GetXaxis()->SetTitle("Fake Rate");  
+      FRSigAll->GetYaxis()->SetTitle("Number of events"); 
+      FRSigAll->Divide(phoETSigAll_noconv);        
 
   std::cout << "" << std::endl;
   std::cout << "***********************EB Signal Events*************************" << std::endl;
@@ -702,7 +931,12 @@ TH1D* FRSigEE = (TH1D*)phoETSigEE->Clone("FR");
   barrelHistos.push_back(phoEtaSigEB);
   barrelHistos.push_back(phoEtaSigEB_noconv);
   barrelHistos.push_back(phoPhiSigEB);
-  barrelHistos.push_back(phoPhiSigEB_noconv); 
+  barrelHistos.push_back(phoPhiSigEB_noconv);
+  barrelHistos.push_back(PUSigEB);
+  barrelHistos.push_back(PUSigEB_noconv); 
+//  barrelHistos.push_back(nTrksSigEB);
+//  barrelHistos.push_back(nTrksSigEB_noconv);
+  barrelHistos.push_back(FRSigEB);
 
   std::vector<TH1D*> endcapHistos;
 
@@ -712,6 +946,11 @@ TH1D* FRSigEE = (TH1D*)phoETSigEE->Clone("FR");
   endcapHistos.push_back(phoEtaSigEE_noconv);
   endcapHistos.push_back(phoPhiSigEE);
   endcapHistos.push_back(phoPhiSigEE_noconv);
+  endcapHistos.push_back(PUSigEE);
+  endcapHistos.push_back(PUSigEE_noconv);
+ // endcapHistos.push_back(nTrksSigEE);
+ // endcapHistos.push_back(nTrksSigEE_noconv);
+  endcapHistos.push_back(FRSigEE);
 
   std::vector<TH1D*> fullHistos;
 
@@ -722,8 +961,9 @@ TH1D* FRSigEE = (TH1D*)phoETSigEE->Clone("FR");
   fullHistos.push_back(phoPhiSigAll);
 //  endcapHistos.push_back(phoPhiSigAll_noconv);
  // fullHistos.push_back(N_Pho);
- // fullHistos.push_back(PU);
- // fullHistos.push_back(N_Trks);
+  fullHistos.push_back(PUSigAll);
+//  fullHistos.push_back(nTrksSigAll);
+  fullHistos.push_back(FRSigAll);
 
 // Plotting section
 for (unsigned int i = 0; i < barrelHistos.size(); ++i)
@@ -738,7 +978,7 @@ for (unsigned int i = 0; i < endcapHistos.size(); ++i)
 
 for (unsigned int i = 0; i < fullHistos.size(); ++i)
 {
-  doPlot(fullHistos[i], kRed+2);
+  doPlot(fullHistos[i], kRed+1);
 }
 
   TCanvas *c2 = new TCanvas("c2","c2",10,10,900, 600);
@@ -747,14 +987,9 @@ for (unsigned int i = 0; i < fullHistos.size(); ++i)
 
   c2->SaveAs("Plots/phoETvsEtaSigAll.pdf");
 
-
-  TH1D* num = (TH1D*)phoETSigEB->Clone("num");
-  TH1D* denom = (TH1D*)phoETSigEB_noconv->Clone("denom");
-        denom->Add(num);
-  num->Divide(denom);     
-
-  std::cout << "number of events in num = " << num->Integral() << ", denom = " << denom->Integral() << ", Fake rate = " << std::endl;
-
+  TCanvas* c3 = new TCanvas("c3");
+          FRvsET->Draw();
+  c3->SaveAs("Plots/FRvsET.pdf");        
 
 
   std::cout << "barrel signal a=" << sumSignalNumEB << "   b=" << sumSignalDenomEB << std::endl;
@@ -796,6 +1031,7 @@ for (unsigned int i = 0; i < fullHistos.size(); ++i)
   std::cout << " signal photons: " << nSigBarrel << "    weighted:   " << nSigBarrelWeighted << std::endl;
   std::cout << " backgr photons: " << nBgBarrel << "    weighted:   " << nBgBarrelWeighted << std::endl;
   
+  std::cout << "Integral of fake rate " << FRvsET->Integral() << std::endl;
 
 }
 
