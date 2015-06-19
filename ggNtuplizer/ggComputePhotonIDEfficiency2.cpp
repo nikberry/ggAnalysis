@@ -24,6 +24,7 @@
 #include <vector>
 
 bool doLogPlot = false;
+bool addHashErrors = false;
 
 const int nWP = 3;
 enum WpType { WP_LOOSE = 0,
@@ -74,6 +75,7 @@ void set_plot_style();
 TText* doPreliminary(double x_pos,double y_pos);
 void doPlot(TH1D* plot, Color_t fillColour);
 TLegend* doLegend(TH1D* plot);
+TH1D* doHashErrors(TH1D* plot);
 
 void ggComputePhotonIDEfficiency2()
 {
@@ -1238,13 +1240,13 @@ bool isMatched(float pEta, float pPhi,
 
 	bool passesZmass = false;
 
-	TLorentzVector photon1;
-	TLorentzVector photon2;
+	TLorentzVector electron1;
+	TLorentzVector electron2;
 	
-	photon1.SetPtEtaPhiE(photonCollection[0][0],photonCollection[0][1],photonCollection[0][2],photonCollection[0][0]);
-	photon2.SetPtEtaPhiE(photonCollection[1][0],photonCollection[1][1],photonCollection[1][2],photonCollection[1][0]);
+	electron1.SetPtEtaPhiE(photonCollection[0][0],photonCollection[0][1],photonCollection[0][2],photonCollection[0][0]);
+	electron2.SetPtEtaPhiE(photonCollection[1][0],photonCollection[1][1],photonCollection[1][2],photonCollection[1][0]);
 	
-	float mass_ll = (photon1 + photon2).M();
+	float mass_ll = (electron1 + electron2).M();
 	std::cout << "Inv Mass = " << mass_ll << std::endl;
 		
 	if(mass_ll > 60 && mass_ll < 120)
@@ -1292,6 +1294,11 @@ TString name = string(plot->GetName());
       plot->SetMaximum(plot->GetBinContent(plot->GetMaximumBin())*1.3);
       plot->Draw();
 
+      if(addHashErrors){
+            TH1D* hashErrors = doHashErrors(plot);
+            hashErrors->Draw("same");
+      }
+
       TText* prelim = doPreliminary(0.14, 0.84);
       prelim->Draw("same");
 
@@ -1321,3 +1328,13 @@ TLegend* doLegend(TH1D* plot){
       return leg;
 }           
 
+TH1D* doHashErrors(TH1D* plot){
+  TH1D * hashErrors = plot;
+
+  hashErrors->SetFillColor(kBlack);
+  hashErrors->SetFillStyle(3354);
+  hashErrors->SetMarkerSize(0.);
+  hashErrors->SetStats(0);
+
+  return hashErrors;
+}
