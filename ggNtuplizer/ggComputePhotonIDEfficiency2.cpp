@@ -104,6 +104,10 @@ void ggComputePhotonIDEfficiency2()
         N_Pho->GetXaxis()->SetTitle("N_{#gamma}");
         N_Pho->GetYaxis()->SetTitle("Number of events");
 
+  TH1D* N_Vtx = new TH1D("N_Vtx", "", 42, 0, 42);
+        N_Vtx->GetXaxis()->SetTitle("N_{nVtx}");
+        N_Vtx->GetYaxis()->SetTitle("Number of events");
+
   TH1D* PUSigAll = new TH1D("PUSigAll", "", 90, 0, 90);
         PUSigAll->GetXaxis()->SetTitle("PU");
         PUSigAll->GetYaxis()->SetTitle("Number of events");
@@ -226,6 +230,7 @@ void ggComputePhotonIDEfficiency2()
   float rho;
   std::vector<int> *nPU = 0;
   int *nTrksPV;  
+  int *nVtx;
 
   // Per-photon variables
   // Kinematics
@@ -257,6 +262,7 @@ void ggComputePhotonIDEfficiency2()
   TBranch *b_rho = 0;
   TBranch *b_nPU = 0;
   TBranch *b_nTrksPV = 0;
+  TBranch *b_nVtx = 0;
   TBranch *b_phoEt = 0;
   TBranch *b_phoSCEta = 0;
   TBranch *b_phoPhi = 0;
@@ -281,6 +287,7 @@ void ggComputePhotonIDEfficiency2()
   tree->SetBranchAddress("rho", &rho, &b_rho);
   tree->SetBranchAddress("nPU", &nPU, &b_nPU);
   tree->SetBranchAddress("nTrksPV", &nTrksPV, &b_nTrksPV);
+  tree->SetBranchAddress("nVtx", &nVtx, &b_nVtx);
   tree->SetBranchAddress("phoEt", &phoEt, &b_phoEt);
   tree->SetBranchAddress("phoSCEta", &phoSCEta, &b_phoSCEta);
   tree->SetBranchAddress("phoPhi", &phoPhi, &b_phoPhi);
@@ -326,6 +333,7 @@ void ggComputePhotonIDEfficiency2()
     b_nPho->GetEntry(tentry);
     b_nPU->GetEntry(tentry);
     b_nTrksPV->GetEntry(tentry);
+    b_nVtx->GetEntry(tentry);
 
     // Get data for all photons in this event, only vars of interest
     b_phoEt->GetEntry(tentry);
@@ -421,6 +429,7 @@ can2->SaveAs("Plots/Background.pdf");
     b_rho->GetEntry(tentry);
     b_nPU->GetEntry(tentry);
     b_nTrksPV->GetEntry(tentry);
+    b_nVtx->GetEntry(tentry);
 
     if(verbose)
       std::cout << "Event " << ievent << ", number of photons " << nPho << std::endl;
@@ -444,6 +453,11 @@ can2->SaveAs("Plots/Background.pdf");
     b_mcEta->GetEntry(tentry);
     b_mcPhi->GetEntry(tentry);
 
+//std::cout << "nPU at ievent = " << nPU->at(ievent) << std::endl;
+  // PUSigAll->Fill(nPU->at(ievent));
+
+std::cout << "nVtx at ievent = " << nVtx.[ievent] << std::endl;
+  // N_Vtx->Fill(nVtx->at(ievent));
 
     // Loop over photons
     for(int ipho = 0; ipho < nPho; ipho++){
@@ -502,7 +516,6 @@ can2->SaveAs("Plots/Background.pdf");
 	 phoEtaSigAll->Fill(phoSCEta->at(ipho), weight);
    phoPhiSigAll->Fill(phoPhi->at(ipho), weight);
 	 phoETvsEtaSigAll->Fill(phoSCEta->at(ipho), phoEt->at(ipho), weight);
-   PUSigAll->Fill(nPU->at(ipho), weight);
    //nTrksSigAll->Fill(nTrksPV->at(ievent), weight);
 	  	
 
@@ -520,6 +533,7 @@ can2->SaveAs("Plots/Background.pdf");
       phoEtaSigEB->Fill(phoSCEta->at(ipho), weight);
       phoPhiSigEB->Fill(phoPhi->at(ipho), weight);
       PUSigEB->Fill(nPU->at(ipho), weight);
+      N_Vtx->Fill(nVtx->at(ipho), weight);
       //nTrksSigEB->Fill(nTrksPV->at(ipho), weight);
 
 	  }
