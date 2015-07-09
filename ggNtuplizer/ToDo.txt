@@ -1,11 +1,12 @@
+-make sure matching is correct for new spring15 sample. 
 -Make sure using uptodate WP (medium) -- just need to fix the neutral hadron
 barrel somehow.
 -Apply selection --- only Zmass veto to do
 -contact Ming regarding 8 TeV DY sample
--Plot fake rate vs pT, eta, N_trks, PU, etc
+-Plot fake rate vs pT, eta, N_trks, PU, etc --- having trouble plotting normal
+branches - variables are TBranchElements.
 -Do I consider just barrel, or endcaps as well? ---both but separately. Still
 plot for full detector
--Pt between 30 and 200? ----- between 20 and 200.
 -make better set-up with a photon collection and include an N-1 selection for
 all cuts
 

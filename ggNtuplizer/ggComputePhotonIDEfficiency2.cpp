@@ -46,6 +46,7 @@ const TString treename = "ggNtuplizer/EventTree";
 //const TString fname1 = "/media/nik/NIKBERRYHD/job_spring14_DYJets_20bx25.root";
 //const TString fname1 = "/nfs/data/eepgnnb/EGamma/job_spring14_DYJets_20bx25.root"; small sample
 const TString fname1 = "/nfs/data/eepgnnb/EGamma/job_phys14_zjets_20bx25.root";
+//const TString fname1 = "job_spring15_DYJetsToLL_m50_25ns.root";
 
 bool verbose = false;
 bool smallEventCount = false;
@@ -100,13 +101,53 @@ void ggComputePhotonIDEfficiency2()
   
   //Set histos
   //Event variables
-  TH1D* N_Pho = new TH1D("N_Pho", "", 12, 0, 12);
-        N_Pho->GetXaxis()->SetTitle("N_{#gamma}");
-        N_Pho->GetYaxis()->SetTitle("Number of events");
+  TH1D* nPhoSigAll = new TH1D("nPhoSigAll", "", 65, 0, 13);
+        nPhoSigAll->GetXaxis()->SetTitle("N_{#gamma}");
+        nPhoSigAll->GetYaxis()->SetTitle("Number of events");
 
-  TH1D* N_Vtx = new TH1D("N_Vtx", "", 42, 0, 42);
-        N_Vtx->GetXaxis()->SetTitle("N_{nVtx}");
-        N_Vtx->GetYaxis()->SetTitle("Number of events");
+  TH1D* nPhoSigEB = new TH1D("nPhoSigEB", "", 65, 0, 13);
+        nPhoSigEB->GetXaxis()->SetTitle("N_{#gamma}");
+        nPhoSigEB->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* nPhoSigEE = new TH1D("nPhoSigEE", "", 65, 0, 13);
+        nPhoSigEE->GetXaxis()->SetTitle("N_{#gamma}");
+        nPhoSigEE->GetYaxis()->SetTitle("Number of events");  
+
+  TH1D* nPhoSigAll_noconv = new TH1D("nPhoSigAll_noconv", "", 65, 0, 13);
+        nPhoSigAll_noconv->GetXaxis()->SetTitle("N_{#gamma}");
+        nPhoSigAll_noconv->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* nPhoSigEB_noconv = new TH1D("nPhoSigEB_noconv", "", 65, 0, 13);
+        nPhoSigEB_noconv->GetXaxis()->SetTitle("N_{#gamma}");
+        nPhoSigEB_noconv->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* nPhoSigEE_noconv = new TH1D("nPhoSigEE_noconv", "", 65, 0, 13);
+        nPhoSigEE_noconv->GetXaxis()->SetTitle("N_{#gamma}");
+        nPhoSigEE_noconv->GetYaxis()->SetTitle("Number of events");               
+
+  TH1D* nVtxSigAll = new TH1D("nVtxSigAll", "", 210, 0, 42);
+        nVtxSigAll->GetXaxis()->SetTitle("N_{nVtx}");
+        nVtxSigAll->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* nVtxSigEB = new TH1D("nVtxSigEB", "", 210, 0, 42);
+        nVtxSigEB->GetXaxis()->SetTitle("N_{nVtx}(barrel)");
+        nVtxSigEB->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* nVtxSigEE = new TH1D("nVtxSigEE", "", 210, 0, 42);
+        nVtxSigEE->GetXaxis()->SetTitle("N_{nVtx}(endcap)");
+        nVtxSigEE->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* nVtxSigAll_noconv = new TH1D("nVtxSigAll_noconv", "", 210, 0, 42);
+        nVtxSigAll_noconv->GetXaxis()->SetTitle("N_{nVtx}");
+        nVtxSigAll_noconv->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* nVtxSigEB_noconv = new TH1D("nVtxSigEB_noconv", "", 210, 0, 42);
+        nVtxSigEB_noconv->GetXaxis()->SetTitle("N_{nVtx}(barrel)");
+        nVtxSigEB_noconv->GetYaxis()->SetTitle("Number of events");
+
+  TH1D* nVtxSigEE_noconv = new TH1D("nVtxSigEE_noconv", "", 210, 0, 42);
+        nVtxSigEE_noconv->GetXaxis()->SetTitle("N_{nVtx}(endcap)");
+        nVtxSigEE_noconv->GetYaxis()->SetTitle("Number of events");        
 
   TH1D* PUSigAll = new TH1D("PUSigAll", "", 90, 0, 90);
         PUSigAll->GetXaxis()->SetTitle("PU");
@@ -139,6 +180,10 @@ void ggComputePhotonIDEfficiency2()
   TH1D* nTrksSigEE = new TH1D("nTrksSigEE", "", 240, 0, 240);
         nTrksSigEE->GetXaxis()->SetTitle("N_{Tracks}");
         nTrksSigEE->GetYaxis()->SetTitle("Number of events"); 
+
+  TH1D* nTrksSigAll_noconv = new TH1D("nTrksSigAll_noconv", "", 240, 0, 240);
+        nTrksSigAll_noconv->GetXaxis()->SetTitle("N_{Tracks}");
+        nTrksSigAll_noconv->GetYaxis()->SetTitle("Number of events");          
 
   TH1D* nTrksSigEB_noconv = new TH1D("nTrksSigEB_noconv", "", 240, 0, 240);
         nTrksSigEB_noconv->GetXaxis()->SetTitle("N_{Tracks}");
@@ -228,9 +273,10 @@ void ggComputePhotonIDEfficiency2()
   // Event-level variables:   
   int nPho;
   float rho;
-  std::vector<int> *nPU = 0;
-  int *nTrksPV;  
-  int *nVtx;
+  std::vector<double> *nPU = 0;
+  int nTrksPV;  
+  int nVtx;
+  //std::vector<int> *nVtx = 0;
 
   // Per-photon variables
   // Kinematics
@@ -272,7 +318,7 @@ void ggComputePhotonIDEfficiency2()
   TBranch *b_phoPFChIso = 0;
   TBranch *b_phoPFNeuIso = 0;
   TBranch *b_phohasPixelSeed = 0;
-  TBranch * b_phoEleVeto = 0;
+  TBranch *b_phoEleVeto = 0;
   //
   TBranch *b_mcPID;
   TBranch *b_mcMomPID;
@@ -454,10 +500,8 @@ can2->SaveAs("Plots/Background.pdf");
     b_mcPhi->GetEntry(tentry);
 
 //std::cout << "nPU at ievent = " << nPU->at(ievent) << std::endl;
+//std::cout << "nVtx at ievent = " << nVtx->at(ievent) << std::endl;
   // PUSigAll->Fill(nPU->at(ievent));
-
-std::cout << "nVtx at ievent = " << nVtx.[ievent] << std::endl;
-  // N_Vtx->Fill(nVtx->at(ievent));
 
     // Loop over photons
     for(int ipho = 0; ipho < nPho; ipho++){
@@ -469,6 +513,7 @@ std::cout << "nVtx at ievent = " << nVtx.[ievent] << std::endl;
      // if( nPho < 2 ) continue; 
          
 //      bool withinZMassRange = passesZmass(photonCollection);
+
 
       bool isBarrel = (fabs(phoSCEta->at(ipho)) < barrelEtaLimit);
       bool isEndcap = (endcapLowerEtaLimit < fabs(phoSCEta->at(ipho)) && fabs(phoSCEta->at(ipho)) < endcapUpperEtaLimit);
@@ -516,8 +561,32 @@ std::cout << "nVtx at ievent = " << nVtx.[ievent] << std::endl;
 	 phoEtaSigAll->Fill(phoSCEta->at(ipho), weight);
    phoPhiSigAll->Fill(phoPhi->at(ipho), weight);
 	 phoETvsEtaSigAll->Fill(phoSCEta->at(ipho), phoEt->at(ipho), weight);
-   //nTrksSigAll->Fill(nTrksPV->at(ievent), weight);
-	  	
+
+    std::vector<int> nVtxAllVec; 
+    nVtxAllVec.push_back(nVtx);
+    for (unsigned int j = 0; j < nVtxAllVec.size(); ++j)
+    {
+    // std::cout << "nVtx at event = " << nVtxVec[j] << std::endl;
+      nVtxSigAll->Fill(nVtxAllVec[j], weight);
+
+    }
+    std::vector<int> nPhoAllVec; 
+    nPhoAllVec.push_back(nPho);
+    for (unsigned int j = 0; j < nPhoAllVec.size(); ++j)
+    {
+    // std::cout << "nPho at event = " << nPhoVec[j] << std::endl;
+      nPhoSigAll->Fill(nPhoAllVec[j], weight);
+
+    }
+
+    std::vector<int> nTrksAllVec; 
+    nTrksAllVec.push_back(nTrksPV);
+    for (unsigned int j = 0; j < nTrksAllVec.size(); ++j)
+    {
+    // std::cout << "nTrks at event = " << nTrksVec[j] << std::endl;
+      nTrksSigAll->Fill(nTrksAllVec[j], weight);
+
+    }
 
 	 if( isBarrel ) {
 	  nSigBarrel++;
@@ -533,11 +602,37 @@ std::cout << "nVtx at ievent = " << nVtx.[ievent] << std::endl;
       phoEtaSigEB->Fill(phoSCEta->at(ipho), weight);
       phoPhiSigEB->Fill(phoPhi->at(ipho), weight);
       PUSigEB->Fill(nPU->at(ipho), weight);
-      N_Vtx->Fill(nVtx->at(ipho), weight);
-      //nTrksSigEB->Fill(nTrksPV->at(ipho), weight);
+
+      std::vector<double> nVtxSigEBVec;
+      nVtxSigEBVec.push_back(nVtx);
+      for (unsigned int j = 0; j < nVtxSigEBVec.size(); ++j)
+      {
+      // std::cout << "nVtx at event = " << nVtxVec[j] << std::endl;
+      nVtxSigEB->Fill(nVtxSigEBVec[j], weight);
+
+      }
+
+      std::vector<double> nPhoSigEBVec;
+      nPhoSigEBVec.push_back(nPho);
+      for (unsigned int j = 0; j < nPhoSigEBVec.size(); ++j)
+      {
+      // std::cout << "nPho at event = " << nPhoVec[j] << std::endl;
+      nPhoSigEB->Fill(nPhoSigEBVec[j], weight);
+
+      }
+
+      std::vector<double> nTrksSigEBVec;
+      nTrksSigEBVec.push_back(nTrksPV);
+      for (unsigned int j = 0; j < nTrksSigEBVec.size(); ++j)
+      {
+      // std::cout << "nTrks at event = " << nTrksVec[j] << std::endl;
+      nTrksSigEB->Fill(nTrksSigEBVec[j], weight);
+
+      }
 
 	  }
 	 } else if( isEndcap ){
+
 	  sumSignalDenomEE += weight;
 	  sumSignalDenomEEErr2 += weight*weight;	  
 	  if( pass ) {
@@ -548,7 +643,33 @@ std::cout << "nVtx at ievent = " << nVtx.[ievent] << std::endl;
       phoEtaSigEE->Fill(phoSCEta->at(ipho), weight);
       phoPhiSigEE->Fill(phoPhi->at(ipho), weight);
       PUSigEE->Fill(nPU->at(ipho), weight);
-      //nTrksSigEE->Fill(nTrksPV->at(ipho), weight);
+
+      std::vector<double> nVtxSigEEVec;
+      nVtxSigEEVec.push_back(nVtx);
+      for (unsigned int j = 0; j < nVtxSigEEVec.size(); ++j)
+      {
+      // std::cout << "nVtx at event = " << nVtxVec[j] << std::endl;
+        nVtxSigEE->Fill(nVtxSigEEVec[j], weight);
+
+      }
+
+      std::vector<double> nPhoSigEEVec;
+      nPhoSigEEVec.push_back(nPho);
+      for (unsigned int j = 0; j < nPhoSigEEVec.size(); ++j)
+      {
+      // std::cout << "nPho at event = " << nPhoVec[j] << std::endl;
+        nPhoSigEE->Fill(nPhoSigEEVec[j], weight);
+
+      }
+
+      std::vector<double> nTrksSigEEVec;
+      nTrksSigEEVec.push_back(nTrksPV);
+      for (unsigned int j = 0; j < nTrksSigEEVec.size(); ++j)
+      {
+      // std::cout << "nTrks at event = " << nTrksVec[j] << std::endl;
+        nTrksSigEE->Fill(nTrksSigEEVec[j], weight);
+
+      }
 
 	  }
 
@@ -677,6 +798,31 @@ for(UInt_t ievent = 0; ievent < maxEvents; ievent++){
 	//phoTotCheck_conv->Fill(phoSCEta->at(ipho), phoEt->at(ipho), weight);
     phoETSigAll_noconv->Fill(phoEt->at(ipho), weight);
 
+    std::vector<int> nVtxAllVec; 
+    nVtxAllVec.push_back(nVtx);
+    for (unsigned int j = 0; j < nVtxAllVec.size(); ++j)
+    {
+    // std::cout << "nVtx at event = " << nVtxVec[j] << std::endl;
+      nVtxSigAll_noconv->Fill(nVtxAllVec[j], weight);
+
+    }
+    std::vector<int> nPhoAllVec; 
+    nPhoAllVec.push_back(nPho);
+    for (unsigned int j = 0; j < nPhoAllVec.size(); ++j)
+    {
+    // std::cout << "nPho at event = " << nPhoVec[j] << std::endl;
+      nPhoSigAll_noconv->Fill(nPhoAllVec[j], weight);
+
+    }
+
+    std::vector<int> nTrksAllVec; 
+    nTrksAllVec.push_back(nTrksPV);
+    for (unsigned int j = 0; j < nTrksAllVec.size(); ++j)
+    {
+    // std::cout << "nTrks at event = " << nTrksVec[j] << std::endl;
+      nTrksSigAll_noconv->Fill(nTrksAllVec[j], weight);
+
+    }  
 	  	
 
 	if( isBarrel ) {
@@ -684,6 +830,7 @@ for(UInt_t ievent = 0; ievent < maxEvents; ievent++){
 	  //nSigBarrelWeighted += weight;
 	  //sumSignalDenomEB += weight;
 	  //sumSignalDenomEBErr2 += weight*weight;
+
 
 	  if( pass ) {
 	    //sumSignalNumEB += weight;
@@ -950,10 +1097,13 @@ TH1D* FRSigAll = (TH1D*)phoETSigAll->Clone("FRSigAll");
   barrelHistos.push_back(phoPhiSigEB_noconv);
   barrelHistos.push_back(PUSigEB);
   barrelHistos.push_back(PUSigEB_noconv); 
-//  barrelHistos.push_back(nTrksSigEB);
-//  barrelHistos.push_back(nTrksSigEB_noconv);
+  barrelHistos.push_back(nTrksSigEB);
+  barrelHistos.push_back(nTrksSigEB_noconv);
   barrelHistos.push_back(FRSigEB);
-
+  barrelHistos.push_back(nVtxSigEB);
+  barrelHistos.push_back(nVtxSigEB_noconv);
+  barrelHistos.push_back(nPhoSigEB);
+  barrelHistos.push_back(nPhoSigEB_noconv);
   std::vector<TH1D*> endcapHistos;
 
   endcapHistos.push_back(phoETSigEE);
@@ -964,10 +1114,13 @@ TH1D* FRSigAll = (TH1D*)phoETSigAll->Clone("FRSigAll");
   endcapHistos.push_back(phoPhiSigEE_noconv);
   endcapHistos.push_back(PUSigEE);
   endcapHistos.push_back(PUSigEE_noconv);
- // endcapHistos.push_back(nTrksSigEE);
- // endcapHistos.push_back(nTrksSigEE_noconv);
+  endcapHistos.push_back(nTrksSigEE);
+  endcapHistos.push_back(nTrksSigEE_noconv);
   endcapHistos.push_back(FRSigEE);
-
+  endcapHistos.push_back(nVtxSigEE);
+  endcapHistos.push_back(nVtxSigEE_noconv);  
+  endcapHistos.push_back(nPhoSigEE);
+  endcapHistos.push_back(nPhoSigEE_noconv);
   std::vector<TH1D*> fullHistos;
 
   fullHistos.push_back(phoETSigAll);
@@ -976,10 +1129,14 @@ TH1D* FRSigAll = (TH1D*)phoETSigAll->Clone("FRSigAll");
 //  endcapHistos.push_back(phoEtaSigAll_noconv);
   fullHistos.push_back(phoPhiSigAll);
 //  endcapHistos.push_back(phoPhiSigAll_noconv);
- // fullHistos.push_back(N_Pho);
   fullHistos.push_back(PUSigAll);
-//  fullHistos.push_back(nTrksSigAll);
+  fullHistos.push_back(nTrksSigAll);
+  fullHistos.push_back(nTrksSigAll_noconv);  
   fullHistos.push_back(FRSigAll);
+  fullHistos.push_back(nVtxSigAll);
+  fullHistos.push_back(nVtxSigAll_noconv);  
+  fullHistos.push_back(nPhoSigAll);
+  fullHistos.push_back(nPhoSigAll_noconv);  
 
 // Plotting section
 for (unsigned int i = 0; i < barrelHistos.size(); ++i)
